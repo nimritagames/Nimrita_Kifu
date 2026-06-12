@@ -19,6 +19,8 @@ lives here and is non-negotiable, regardless of session, chat, or model.
 
 - **Start:** read docs/STATUS.md, then `git log --oneline -10`. Orient before acting.
 - **End:** update STATUS.md (what changed / what was verified / what's next / residual risk),
+  append a plain-words entry to **docs/JOURNAL.md** — the human story of the session (what
+  happened, what was learned, what it felt like), no jargon, no technical changelog — then
   commit all work — one logical change per commit, conventional prefix, imperative, <72 chars.
   Never leave the tree dirty at session end.
 
