@@ -10,10 +10,12 @@ approved, game #2 = Ludo, framework named Nimrita_Kifu. All six paper gates ran
 
 ## Next gate (in order)
 
-1. **Tech spec** — concrete TypeScript interfaces, event envelope, log framing; incorporates
-   R1–R7 into the C7/C8 contract text. (Claude's work; no user input needed to start.)
-2. **Gate re-runs** — hanchan-carryover + cash-rebuy paper gates against the revised contract.
-   Passing both unblocks the C7/C8 API freeze.
+1. **Tech spec** — IN PROGRESS: `docs/spec/` opened; 01-game-contract (full TS contract,
+   R1–R7 incorporated) and 02-determinism (KCF-1 canonical form, SHA-256, PCG32, HKDF,
+   fingerprint) are DRAFT v0.1. Remaining: 03-event-model, 04-log-format, 05-runtime,
+   06-observability.
+2. **Gate re-runs** — hanchan-carryover + cash-rebuy paper gates against
+   `docs/spec/01-game-contract.md`. Passing both unblocks the C7/C8 API freeze.
 3. **Phase 1** — retrofit inside MJ-socket-server (admission log, seeded RNG sites, crash dump,
    CLI replay harness, incident baseline). Starts on user "go".
 

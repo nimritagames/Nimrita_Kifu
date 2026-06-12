@@ -91,3 +91,17 @@ not the boss. The only way to change the rules is to change them in the open.
 
 Everything before the real building is now done: the thinking, the law, the locks, the
 pipeline. Next entry should be the start of the blueprints.
+
+## 2026-06-12 (night) — The blueprints begin
+
+And so they did, the same day. The first two blueprint documents exist now: one that
+defines, precisely, what a game *is* to this framework — the complete shape of the pure
+module a game developer writes, with every hard-won lesson from the paper trials built
+into its bones — and one that nails down the unglamorous machinery of trust: exactly how
+state is written down, exactly how it is fingerprinted, exactly where randomness comes
+from. Boring choices, chosen deliberately, because boring is what you can still verify
+in ten years.
+
+Fittingly, these blueprints are the first work in the project's history to arrive through
+the new front door: a reviewed pull request, machine-checked, merged only on green. The
+execution phase has begun the way it means to go on.
