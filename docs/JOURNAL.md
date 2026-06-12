@@ -60,6 +60,14 @@ exposed it. We fixed it to speak up instead of staying silent — and that littl
 this whole project in miniature. Don't trust that something works. Test it, catch it,
 fix it, and keep the lesson.
 
+And then, minutes after the guards went live, they were tested for real — by their own
+author. Adding this very journal practice to the project's law required editing a
+protected file, and the machinery said *no*. Not to a stranger. To the builder itself.
+The change only went through the proper way: openly declared, explicitly approved by the
+human, applied, and the door locked again behind it. The first amendment ceremony in the
+project's history, and the rules held against everyone — which is the only kind of rule
+worth having.
+
 The journey so far has produced no product code at all — and that's exactly as planned.
 First the thinking, then the law, then the code. Next up: turning the constitution into
 precise technical blueprints, and then the first real work begins inside the old mahjong
