@@ -1,7 +1,9 @@
-# Charter v4 — Turn-Based Multiplayer Framework & Operating Model
+# Nimrita_Kifu — Framework Charter
+*Turn-based multiplayer framework & operating model*
 
 | | |
 |---|---|
+| **Name** | **Nimrita_Kifu** (named 2026-06-12; suggested package scope `@nimrita/kifu`) |
 | **Version** | 4.2 (Amendments 1–2 applied — see Amendment log) |
 | **Date** | 2026-06-12 |
 | **Status** | Constitution. Amended only by ADR + version bump (see §3, Evolving the framework). |
@@ -93,7 +95,7 @@ These are sequenced downstream on purpose; defining them now would be speculatio
 1. **Phase 0 paper gates — RAN 2026-06-12** (results in `docs/phase0/`): all six expressible-with-friction; Contract Revision Set 1 (R1–R7, see `docs/phase0/0-VERDICT.md`) ratified by Amendment 2; hanchan-carryover and cash-rebuy gates re-run against the revised contract before the C7/C8 freeze.
 2. **The tech spec (after the gates):** concrete TypeScript interfaces, event envelope schema, log file framing, snapshot format, manifest schema, canonical-hash and KDF algorithm choices.
 3. **The Phase 1 retrofit plan (lives in MJ-socket-server):** concrete call sites, JSONL shape, incident-classification rubric.
-4. **A name** for the framework.
+4. ~~A name for the framework~~ — resolved 2026-06-12: **Nimrita_Kifu**. *Kifu* (棋譜): the game record from which a match replays perfectly — the architecture, named.
 
 ## Appendix — flagged design choices
 
