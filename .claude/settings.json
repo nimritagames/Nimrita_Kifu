@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/protect-paths.js",
+            "timeout": 15,
+            "statusMessage": "Kifu governance: protected-path check"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/session-audit.js",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
