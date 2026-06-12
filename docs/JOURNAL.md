@@ -72,3 +72,22 @@ The journey so far has produced no product code at all — and that's exactly as
 First the thinking, then the law, then the code. Next up: turning the constitution into
 precise technical blueprints, and then the first real work begins inside the old mahjong
 server — mining years of scars for the lessons that will make every future game stronger.
+
+## 2026-06-12 (evening) — Doors, locks, and going public
+
+The project left this machine today. It now lives on GitHub, under the Nimrita games
+banner — and it went **public**. When it turned out that keeping the repository private
+would mean weaker rules, the choice was easy and a little brave: the rules matter more
+than the secrecy. The constitution and this journal were always going to be worth showing.
+
+The day's manual safety checks became the project's first permanent test suite — twelve
+little trials that prove, on every single change, that the guards still guard. A pipeline
+in the cloud now runs them automatically; the first run came back green in sixteen seconds.
+
+And then the strongest lock yet: the main branch is now sealed so that every change must
+arrive through a reviewed, machine-checked front door. The setting reads, literally,
+"can bypass: never" — and that includes the owner. Nobody slips past. Not the builder,
+not the boss. The only way to change the rules is to change them in the open.
+
+Everything before the real building is now done: the thinking, the law, the locks, the
+pipeline. Next entry should be the start of the blueprints.

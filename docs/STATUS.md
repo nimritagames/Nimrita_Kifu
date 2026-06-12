@@ -20,8 +20,18 @@ approved, game #2 = Ludo, framework named Nimrita_Kifu. All six paper gates ran
 ## Blocked on user
 
 - "Go" for Phase 1 + incident war stories for the baseline rubric (tickets alone are thin).
-- Provisioning (needed by Phase 3, not before): git remote + CI with branch protection,
-  private package registry for `@nimrita/kifu`, Node version pin for the env fingerprint.
+- (Phase 3, not before) package-scope decision: publish `@nimritagames/kifu` from the
+  account, or create a `nimrita` org for `@nimrita/kifu`.
+
+## Infrastructure (live, 2026-06-12)
+
+- **Remote:** https://github.com/nimritagames/Nimrita_Kifu — public by owner decision.
+- **CI:** `.github/workflows/ci.yml` on every push/PR — governance self-test
+  (`tools/hook-tests/run.js`, 12 cases) + docs gate (`tools/verify-docs.js`); auto-upgrades
+  to `npm run verify` when package.json appears. First run green in 16s.
+- **Branch ruleset `main-protection`:** PR-only main, required green `verify` check,
+  no force-push, no deletion, **zero bypass actors** (`current_user_can_bypass: never`).
+- **Node pinned:** 22.17.0 (`.node-version`) — seed of the C2 environment fingerprint.
 
 ## Governance (live)
 
