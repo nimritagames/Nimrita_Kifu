@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Version** | 4.1 (Amendment 1 applied — see Amendment log) |
+| **Version** | 4.2 (Amendments 1–2 applied — see Amendment log) |
 | **Date** | 2026-06-12 |
 | **Status** | Constitution. Amended only by ADR + version bump (see §3, Evolving the framework). |
 | **Provenance** | Survived three adversarial review rounds: 12 fatal gaps (v1→v2), 8 self-contradiction blockers (v2→v3), 3 composition blockers (v3→v4). All 51 findings closed; closure-audited. |
@@ -66,15 +66,15 @@ Targets, stated separately from definitions: TTRC **under 1 minute**; TTD and TT
 
 - **Phase 0 (now):** this charter; the C7/C8 paper-design gates.
 - **Phase 1 — retrofit inside MJ-socket-server (first 3 months from charter approval):** per-match JSONL admission log, seed the ~4 RNG sites via recorded outcomes, last-200-events crash dump, CLI replay harness atop the existing emulation tests; produce the incident baseline + coverage projection. The live game gets diagnostic value immediately; the north star becomes falsifiable.
-- **Phase 2 — Milestone 0 (two-week spike):** vertical-slice reducers for two rulesets (mahjong slice + one flow-divergent game) against the game contract on stubs. The contract survives both or changes now.
+- **Phase 2 — Milestone 0 (two-week spike):** vertical-slice reducers for two rulesets — a mahjong slice + the sealed-bid game from the Phase 0 gates (the flow-divergent slice: collect-all, hidden commitments, reveal-as-explicit-event — the hardest exercise of R1/R4) — against the revised game contract on stubs. The contract survives both or changes now.
 - **Phase 3 — framework v1 extraction (time-boxed one quarter; tiered):** *v1-blocking:* durability + torn-tail handling, hash chain + verified replay, effects gating + outbox, admission log, grant engine, single projection path, C11 observability, versioned release pipeline with the registered-goldens gate (Amendment 1). *Deferred with named stopgaps:* crypto-shredding (access-restricted logs), break-glass tooling (manual audited access), per-segment commit-reveal (sealed seed sidecar), cross-Node-major CI (pinned version), prod projection shadow-replay (dev + CI gates only). First strangler consumer in production: the grant/deadline engine replacing turnTimeoutHandler + claimOrchestrator.
-- **Phase 4 — game #2:** flow-structurally different from mahjong; ships on v1; the Section 5 threshold test runs here; unlocks v2 (web timeline, inspector).
+- **Phase 4 — game #2 (Ludo):** ships on v1 as rules + invariants + projections only — the end-to-end pipeline test (scaffold → CLI harness → goldens → gates → deploy → incident workflow). Flow-divergence validation is carried by the Phase 2 sealed-bid slice and the re-run C7/C8 gates (Amendment 2). The Section 5 threshold test runs here; success unlocks v2 (web timeline, inspector).
 - **Deferred until demanded:** language-neutral protocol, client SDK, realtime engine, multi-node.
 
 ## 5. Success criteria — falsifiable
 
 1. Phase 1 artifacts exist; at the Phase 4 gate, median TTRC over the re-classified incident set is under 1 minute, and TTD and TTE meet the baseline-derived targets.
-2. Game #2 is flow-divergent and written as rules + invariants + projections only.
+2. Game #2 (Ludo) ships written as rules + invariants + projections only; flow-divergence is validated by the Phase 2 sealed-bid slice passing the same contract and by the re-run C7/C8 gates (Amendment 2).
 3. No silent divergence: every replay matches its anchored hash chain or hard-fails at a precise eventSeq.
 4. Zero double-fired external effects across restarts, recoveries, replays, and incident settlements.
 5. A seeded information-leak bug is caught by a projection invariant in CI.
@@ -90,7 +90,7 @@ Client SDK; realtime/tick games; payments/wallet internals (the effects contract
 
 These are sequenced downstream on purpose; defining them now would be speculation the gates below might invalidate.
 
-1. **Phase 0 paper gates (next, due now):** poker / sealed-bid / draft designed against the grant API (C7); hanchan-carryover / poker-rebuy / byo-yomi-restart paper-replays (C8). The grant API is a hypothesis until these run.
+1. **Phase 0 paper gates — RAN 2026-06-12** (results in `docs/phase0/`): all six expressible-with-friction; Contract Revision Set 1 (R1–R7, see `docs/phase0/0-VERDICT.md`) ratified by Amendment 2; hanchan-carryover and cash-rebuy gates re-run against the revised contract before the C7/C8 freeze.
 2. **The tech spec (after the gates):** concrete TypeScript interfaces, event envelope schema, log file framing, snapshot format, manifest schema, canonical-hash and KDF algorithm choices.
 3. **The Phase 1 retrofit plan (lives in MJ-socket-server):** concrete call sites, JSONL shape, incident-classification rubric.
 4. **A name** for the framework.
@@ -101,5 +101,7 @@ These are sequenced downstream on purpose; defining them now would be speculatio
 - **One release, one axis** (reducer semantics or schema, never both) constrains release operations; deliberate, to keep manifests and migration adapters honest.
 
 ## Amendment log
+
+**Amendment 2 — 2026-06-12 (v4.1 → v4.2): Contract Revision Set 1 ratified; game #2 designated.** (a) R1–R7 from the Phase 0 gate verdict (`docs/phase0/0-VERDICT.md`) are ratified for incorporation into the C7/C8 contract text at tech-spec time: R1 admission-time `materialize(state, action, actor, rng)` payload hook; R2 first-class seatless system grants; R3 full deadline/grant lifecycle semantics; R4 collect-all group semantics (groupId, buffering, batch admission); R5 optional deadline (standing grants); R6 per-seat projected grant delivery; R7 game validators as the admission surface + declared non-grant intent types + opaque-ref projection keys. The C7/C8 freeze remains blocked only on re-running the hanchan-carryover and cash-rebuy gates against the revised contract. (b) Game #2 = **Ludo** (author decision): a deliberately simple game whose job is to prove the pipeline — one developer, rules-only module, days not months, full observability inherited at birth. Because Ludo is not flow-divergent (round-robin, no hidden info, no simultaneity), the flow-divergence burden moves to the Phase 2 sealed-bid slice and the gate re-runs; success criterion 2 and Phase 4 reworded accordingly. The anti-fossilization safeguards (grants-not-turns, pre-freeze gates) are unaffected.
 
 **Amendment 1 — 2026-06-12 (v4 → v4.1): distribution model.** Replaced the monorepo-pinned-by-commit clause (§3, Evolving the framework) with versioned-package distribution: every game is its own repository; the framework arrives as a read-only versioned dependency. Reason: author decision — games are separate projects; per-game upgrade independence; fork-prevention becomes structural (read-only install) instead of disciplinary. The cross-game regression gate moves from per-commit-in-monorepo to release time: no framework version is published unless every registered game's golden fixtures replay green. Accepted cost: release/semver discipline arrives in Phase 3 (added to v1-blocking scope). The underlying principle is unchanged: one framework lineage, zero forks, every game's goldens protect every framework change.
