@@ -1,0 +1,28 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - name: governance self-test (the law enforces as written)
+        run: node tools/hook-tests/run.js
+      - name: docs consistency gate
+        run: node tools/verify-docs.js
+      - name: package verify (auto-activates when code exists)
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+            npm run verify
+          else
+            echo "no package.json yet — docs/governance gate only (per CLAUDE.md)"
+          fi
