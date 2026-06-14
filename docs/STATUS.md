@@ -1,23 +1,26 @@
 # Nimrita_Kifu — Status
 
-**Updated:** 2026-06-12 · **Charter:** v4.2
+**Updated:** 2026-06-12 (autonomous session) · **Charter:** v4.2
 
 ## Current phase
 
-**Phase 0 CLOSED.** Charter ratified through Amendment 2: Contract Revision Set 1 (R1–R7)
-approved, game #2 = Ludo, framework named Nimrita_Kifu. All six paper gates ran
-(expressible-with-friction across the board; see docs/phase0/0-VERDICT.md).
+**Tech spec COMPLETE in draft; flow-semantics gates PASSED.** All six spec documents are drafted
+(`docs/spec/00`–`06`). The game contract is at DRAFT v0.3 (R1–R14). The two re-run gates
+(hanchan multi-ron, cash-rebuy seat-reuse) passed a confirmation adversarial pass — every
+flow-semantics kill-shot across poker/sealed-bid/draft/hanchan/cash-game/byo-yomi is closed.
+Two quality findings from the confirmation were folded as Revision Set 3 (R13 occupancy
+lifecycle, R14 machine-checkable settlement coverage).
 
 ## Next gate (in order)
 
-1. **Tech spec** — IN PROGRESS: `docs/spec/` opened; 01-game-contract (full TS contract,
-   R1–R7 incorporated) and 02-determinism (KCF-1 canonical form, SHA-256, PCG32, HKDF,
-   fingerprint) are DRAFT v0.1. Remaining: 03-event-model, 04-log-format, 05-runtime,
-   06-observability.
-2. **Gate re-runs** — hanchan-carryover + cash-rebuy paper gates against
-   `docs/spec/01-game-contract.md`. Passing both unblocks the C7/C8 API freeze.
-3. **Phase 1** — retrofit inside MJ-socket-server (admission log, seeded RNG sites, crash dump,
-   CLI replay harness, incident baseline). Starts on user "go".
+1. **Tech spec polish / user review** — the six spec drafts await the user's read. Open question
+   carried for the user: package scope (`@nimritagames/kifu` vs a `nimrita` org) — Phase 3, not
+   blocking.
+2. **Phase 1** — retrofit inside MJ-socket-server (admission log, seeded RNG sites, crash dump,
+   CLI replay harness, incident baseline). **Starts on user "go" + incident war stories.**
+3. **Phase 2** — two-ruleset spike (mahjong slice + sealed-bid) as executable reducers on stubs;
+   this is where R13 (occupancy lifecycle) and the whole contract get their first *running-code*
+   exercise. The hard C7/C8 freeze rides on these tests, not on the prose.
 
 ## Blocked on user
 
@@ -52,3 +55,10 @@ provisioning list below.
   Phase 0 gates ran (6/6, 12 agents). R1–R7 ratified. Distribution model: one repo per game,
   versioned package, release-time golden gate. Game #2 = Ludo. Named **Nimrita_Kifu**.
   Repo initialized; operating contract (CLAUDE.md) and this STATUS file added.
+- **2026-06-12 (later):** GitHub repo live (public), CI green, branch ruleset (zero bypass).
+  Governance hooks live + battle-proven (denied their own author; first amendment ceremony ran).
+- **2026-06-12 (autonomous session):** Full tech spec drafted (`docs/spec/00`–`06`). Game contract
+  v0.1→v0.3 (Revision Sets 2 & 3, R8–R14). Re-ran the two failed gates against the typed contract
+  (5/6 + 6/7 → both fixes folded → confirmation pass: K2 + K7 closed, no contradiction). Spec docs
+  03–06 (event model, log format, runtime, observability) authored from frozen charter commitments.
+  All decisions made under the user's "decide on my behalf" mandate; flagged for review on return.

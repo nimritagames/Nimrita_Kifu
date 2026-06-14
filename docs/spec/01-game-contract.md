@@ -1,12 +1,20 @@
-# 01 — The Game Contract (DRAFT v0.1)
+# 01 — The Game Contract (DRAFT v0.3)
 
 The complete surface a game implements. Everything here is **pure**: no IO, no clocks,
 no randomness sources, no identity lookups (C2/C3/C10 — lint-banned and replay-verified).
 A game is this interface and nothing else; the framework owns everything impure.
 
-Incorporates the ratified Contract Revision Set 1: R1 (materialize), R2 (system grants),
-R3 (grant lifecycle), R4 (collect-all groups), R5 (standing grants), R6 (grant delivery),
-R7 (validators as the admission surface).
+Incorporates Contract Revision Set 1 (R1–R7, charter Amendment 2): R1 (materialize),
+R2 (system grants), R3 (grant lifecycle), R4 (collect-all groups), R5 (standing grants),
+R6 (grant delivery), R7 (validators as the admission surface).
+
+Incorporates Contract Revision Set 2 (R8–R12, from the gate re-run — `docs/phase0/1-RERUN-VERDICT.md`):
+R8 (grant order = emission order), R9 (SeatRef is per-occupancy), R10 (watchdog grant shape),
+R11 (deadlines read state anchors, never a clock), R12 (settlement-touching covers boundary disposal).
+
+Incorporates Contract Revision Set 3 (R13–R14, from the confirmation pass): R13 (occupancy
+lifecycle is signalled, closing the dangling-ref footgun), R14 (machine-checkable settlement
+coverage). R13's full exercise is the Phase 2 cash-game slice.
 
 ```ts
 // ---------- Foundation types ----------
@@ -17,7 +25,20 @@ export type CanonicalJson =
   | string | number | boolean | null
   | CanonicalJson[] | { [key: string]: CanonicalJson };
 
-/** Opaque seat reference — the ONLY player identifier game code ever sees (C10). */
+/** Opaque per-OCCUPANCY reference — the ONLY player identifier game code ever sees (C10).
+ *  R9: a SeatRef identifies one seating occupancy, NOT a seat position. Taking a vacated
+ *  seat mints a FRESH SeatRef; refs are never recycled across occupants. Because projection
+ *  keys on this ref, a new occupant's projectEvent owner-match fails for the prior occupant's
+ *  records — a joiner can never decode a predecessor's hidden payloads. Games key state on
+ *  SeatRef, not integer seat positions (maintain a SeatRef↔position map if positions matter).
+ *
+ *  R13: every occupancy END is marked by an event the game reduces — a game LEAVE/cash-out
+ *  action, or a framework `seat.vacate` system event (carrying the retired ref) for
+ *  involuntary removal not already represented by a game action; every START is a
+ *  `seat.join` system event / game JOIN carrying the fresh ref + position. So a game can
+ *  deterministically purge or remap SeatRef-keyed state at the boundary, and a non-purged
+ *  ref is detectably dangling (never silently rebinds — the new occupant's ref is fresh).
+ *  Real exercise: the Phase 2 cash-game slice. */
 export type SeatRef = string & { readonly __brand: 'SeatRef' };
 
 /** Server-assigned admission timestamp, integer ms — the sole time authority (C8). */
@@ -79,8 +100,25 @@ export interface GameDefinition<S extends CanonicalJson, A extends ActionTypeMap
   projectState(state: S, viewer: Viewer): CanonicalJson;
 
   /** Checked after every admitted event in dev/CI; shadow-replayed in prod (C11).
-   *  Settlement-touching games MUST include a redundant-recompute invariant. */
-  invariants: Array<{ name: string; check(state: S, event: GameEvent): true | string }>;
+   *  R12: every SETTLEMENT-TOUCHING reducer MUST be covered by at least one redundant-
+   *  recompute invariant — an independently written recomputation compared against the
+   *  reducer's output. "Settlement-touching" includes reducers that move stakes at a
+   *  SEGMENT or SESSION boundary (riichi-pot disposal at close, side-pot settlement),
+   *  not only per-action payouts. The game declares which reducers are settlement-touching
+   *  (see `settlementTouching` below).
+   *
+   *  R14 — MACHINE-CHECKABLE COVERAGE: a redundant-recompute invariant tags itself
+   *  `kind:'redundant-recompute'` and names the action type(s) it `covers`, so CI can
+   *  decide R12 coverage from the typed surface rather than trusting the free-text name. */
+  invariants: Array<
+    | { name: string; check(state: S, event: GameEvent): true | string }
+    | { name: string; kind: 'redundant-recompute'; covers: Array<keyof A>;
+        check(state: S, event: GameEvent): true | string }
+  >;
+
+  /** R12: action types whose reducers move stakes/score with external consequence. CI
+   *  enforces (R14) that each appears in some invariant's `covers`. */
+  settlementTouching?: Array<keyof A>;
 
   /** R7: intent types admissible WITHOUT a grant (join-table, wallet callbacks,
    *  operator actions). Their validators carry full authorization responsibility. */
@@ -120,9 +158,18 @@ export interface Grant<A extends ActionTypeMap> {
 
   /** R4: grants sharing a groupId (within one evaluation) form a collect-all group:
    *  responses buffer outside the log, satisfy-and-disarm their grant on acceptance,
-   *  and admit as one contiguous batch (expiry defaults included, grant order) when
-   *  the last member closes; re-evaluation defers until the batch completes;
-   *  admitLimit bounds how many members may admit (multi-ron > 1).
+   *  and admit as one contiguous batch when the last member closes; re-evaluation
+   *  defers until the batch completes; admitLimit bounds how many members may admit
+   *  (multi-ron > 1; atamahane single-winner = admitLimit 1).
+   *
+   *  R8 — GRANT ORDER IS EMISSION ORDER: the batch (buffered responses + expiry
+   *  defaults) admits in the order pendingGrants RETURNED the grants in the arming
+   *  evaluation. This is distinct from the canonical action-type sort used for grant
+   *  IDENTITY (lifecycle rule 1) — identity-sort is NOT admission-order. admitLimit:1
+   *  admits the first emission-order member; later satisfied members are recorded as
+   *  arbitration losers. Games encode priority (e.g. atamahane counterclockwise from
+   *  discarder) purely by the order they emit grants.
+   *
    *  Omitted => independent grant; overlapping independent responses arbitrate by
    *  `resolution`. */
   resolution?:
@@ -144,6 +191,18 @@ export interface Grant<A extends ActionTypeMap> {
 // 6. R6: grants are delivered only to their own seat, after projection; system grants
 //    are delivered to no one. Grant existence itself can leak — flow helpers must offer
 //    uniform-window modes for hidden-information games.
+// 7. R11 — DEADLINES READ STATE, NEVER A CLOCK: pendingGrants(state) has no clock. Every
+//    future deadline it returns is computed from an absolute timestamp a PRIOR reducer
+//    recorded into state (received as that event's ts, C8) — e.g. windowOpenTs+claimMs,
+//    turnTs+turnMs, the literal sessionDeadlineMs. This is why claim windows do NOT creep:
+//    the anchor is frozen in state, so every re-evaluation recomputes the identical
+//    deadline (and thus the identical grant identity, rule 1). Computing a deadline from
+//    "now" or from the last event's ts is the anti-pattern this rule forbids.
+// 8. R10 — TWO SYSTEM-GRANT SHAPES: (a) IMMEDIATE STEP — seat:null, allowedActions:[],
+//    deadline <= now => fires on arming (deal, reveal, hand-start). (b) WATCHDOG —
+//    seat:null, allowedActions:[], deadline a FUTURE timestamp, onExpiry an escalation
+//    (wallet-close liveness, session max-duration). Both are legal; (b) is a liveness
+//    fence whose only effect is its onExpiry if nothing satisfies it first.
 
 // ---------- Supporting types ----------
 
@@ -178,10 +237,14 @@ export type ActionTypeMap = Record<string, CanonicalJson>;
 - **No framework event types** — seal-release, break-glass, incident-settlement never
   reach game code; the framework projects its own vocabulary (C9).
 
-## Gate obligations on this document
+## Gate status on this document
 
-Per C7/C8 and Amendment 2: the **hanchan-carryover** and **cash-rebuy** paper gates re-run
-against this contract before anything freezes. Their known kill-shots this draft must
-survive: claim-window deadline anchoring (R3.1 identity uses state-derived deadlines, not
-lastTs), rebuy/sit-out as standing grants (R5), wallet callbacks as nonGrantIntents (R7),
-and START_HAND eligibility as a system grant conditioned purely on state (R2).
+The **hanchan-carryover** and **cash-rebuy** gates re-ran against v0.1 (`docs/phase0/reruns/`,
+verdict `docs/phase0/1-RERUN-VERDICT.md`): 5/6 and 6/7 kill-shots survived; the two failures
+(undefined "grant order"; undefined SeatRef occupancy semantics) were closed by R8/R9. The
+**confirmation pass** against v0.2 verified both kill-shots (K2 multi-ron, K7 seat-reuse privacy)
+genuinely close with no contradiction, and surfaced two quality findings now folded as R13/R14
+(this v0.3). **All flow-semantics kill-shots are closed.** Remaining before a hard C7/C8 freeze:
+R13's occupancy lifecycle gets its real exercise at the Phase 2 cash-game slice, and the contract
+becomes executable TypeScript (compiled, type-checked) in Phase 3 — the freeze rides on running
+code, not prose. Until then this contract is DRAFT.
