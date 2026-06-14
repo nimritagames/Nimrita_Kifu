@@ -105,3 +105,30 @@ in ten years.
 Fittingly, these blueprints are the first work in the project's history to arrive through
 the new front door: a reviewed pull request, machine-checked, merged only on green. The
 execution phase has begun the way it means to go on.
+
+## 2026-06-12 (the long autonomous stretch) — Left alone with the keys
+
+The builder stepped out and said, in effect: *you have the keys, keep going, decide for me,
+tell me when I'm back.* So the work continued without a hand on its shoulder — and the test
+of any discipline is what it does when nobody is watching.
+
+What happened is the part I'm proud to write down. We took the two games that had broken the
+design once before — the mahjong scoring tangle and the poker cash-table — and threw them at
+the contract again, this time with all its new bones in place. Five of six trials passed for
+one, six of seven for the other. The two that didn't fail were not failures of the idea; they
+were two sentences the contract hadn't yet said out loud: *which winner gets the pot when two
+people win at once*, and *whether a new player taking an empty seat can somehow peek at the
+last player's cards*. We wrote those two sentences, then ran the trials a third time to be
+sure — and watched them both come clean, with no new cracks opened by the patch.
+
+And the trials, honest as ever, handed back two more small gifts: a way a careless game author
+could trip over a stale player-reference, and a place where a safety rule couldn't be checked
+by machine. We fixed both rather than note-and-forget them. That is the whole ethos — every
+pass makes the thing tighter, and we do not walk past a flaw because it is small or because
+nobody asked.
+
+By the end of the stretch the entire set of blueprints exists: how a game is written, how
+randomness and trust are pinned down, how events are recorded, how the log lives on disk, how
+the engine runs a match, and how anything that goes wrong gets found in under a minute. Six
+documents, all earned the same way — proposed, attacked, repaired. Nothing was taken on faith.
+The keys were used the way the owner would have used them.

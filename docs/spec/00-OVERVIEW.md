@@ -9,7 +9,7 @@ surface; the charter remains the authority on *why*, these documents on *exactly
 
 | Doc | Surface | Status |
 |---|---|---|
-| `01-game-contract.md` | The TypeScript contract a game implements (C7/C9 + R1–R12) | DRAFT v0.2 |
+| `01-game-contract.md` | The TypeScript contract a game implements (C7/C9 + R1–R14) | DRAFT v0.3 |
 | `02-determinism.md` | Canonical state form, hashing, PRNG, KDF, fingerprint (C2/C3) | DRAFT v0.1 |
 | `03-event-model.md` | Event envelope, admission records, record classes (C1) | DRAFT v0.1 |
 | `04-log-format.md` | Physical framing, segments, snapshots, sidecars (C4/C5) | DRAFT v0.1 |

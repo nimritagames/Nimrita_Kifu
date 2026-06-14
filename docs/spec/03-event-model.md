@@ -94,6 +94,7 @@ stream by `(matchId, eventSeq)` but the deterministic replay/hash machinery neve
 | `type` | class | carries | projectEvent (C9) |
 |---|---|---|---|
 | `seg.open` / `seg.close` | system | segmentIndex, `hash(segmentSeed)` (open) / revealed `segmentSeed` (close) | framework-owned; default null below break-glass |
+| `seat.join` / `seat.vacate` (R13) | system | fresh ref + position (join) / retired ref (vacate) | game-reduced (occupancy lifecycle); projection public (presence is not secret) |
 | `sys.deal` / `sys.reveal` / `sys.*` | system | materialized payload (R1) | per game `projectEvent` if the game named the type; framework-owned otherwise |
 | `audit.breakGlass` | audit | grantee, scope, reason | framework-owned; null to all viewers |
 | `audit.sealRelease` | audit | masterSeed (stripped to sidecar on export, D-15) | framework-owned; null |

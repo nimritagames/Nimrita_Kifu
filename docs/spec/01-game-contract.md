@@ -1,4 +1,4 @@
-# 01 — The Game Contract (DRAFT v0.2)
+# 01 — The Game Contract (DRAFT v0.3)
 
 The complete surface a game implements. Everything here is **pure**: no IO, no clocks,
 no randomness sources, no identity lookups (C2/C3/C10 — lint-banned and replay-verified).
@@ -11,6 +11,10 @@ R6 (grant delivery), R7 (validators as the admission surface).
 Incorporates Contract Revision Set 2 (R8–R12, from the gate re-run — `docs/phase0/1-RERUN-VERDICT.md`):
 R8 (grant order = emission order), R9 (SeatRef is per-occupancy), R10 (watchdog grant shape),
 R11 (deadlines read state anchors, never a clock), R12 (settlement-touching covers boundary disposal).
+
+Incorporates Contract Revision Set 3 (R13–R14, from the confirmation pass): R13 (occupancy
+lifecycle is signalled, closing the dangling-ref footgun), R14 (machine-checkable settlement
+coverage). R13's full exercise is the Phase 2 cash-game slice.
 
 ```ts
 // ---------- Foundation types ----------
@@ -26,7 +30,15 @@ export type CanonicalJson =
  *  seat mints a FRESH SeatRef; refs are never recycled across occupants. Because projection
  *  keys on this ref, a new occupant's projectEvent owner-match fails for the prior occupant's
  *  records — a joiner can never decode a predecessor's hidden payloads. Games key state on
- *  SeatRef, not integer seat positions (maintain a SeatRef↔position map if positions matter). */
+ *  SeatRef, not integer seat positions (maintain a SeatRef↔position map if positions matter).
+ *
+ *  R13: every occupancy END is marked by an event the game reduces — a game LEAVE/cash-out
+ *  action, or a framework `seat.vacate` system event (carrying the retired ref) for
+ *  involuntary removal not already represented by a game action; every START is a
+ *  `seat.join` system event / game JOIN carrying the fresh ref + position. So a game can
+ *  deterministically purge or remap SeatRef-keyed state at the boundary, and a non-purged
+ *  ref is detectably dangling (never silently rebinds — the new occupant's ref is fresh).
+ *  Real exercise: the Phase 2 cash-game slice. */
 export type SeatRef = string & { readonly __brand: 'SeatRef' };
 
 /** Server-assigned admission timestamp, integer ms — the sole time authority (C8). */
@@ -93,11 +105,19 @@ export interface GameDefinition<S extends CanonicalJson, A extends ActionTypeMap
    *  reducer's output. "Settlement-touching" includes reducers that move stakes at a
    *  SEGMENT or SESSION boundary (riichi-pot disposal at close, side-pot settlement),
    *  not only per-action payouts. The game declares which reducers are settlement-touching
-   *  (see `settlementTouching` below). */
-  invariants: Array<{ name: string; check(state: S, event: GameEvent): true | string }>;
+   *  (see `settlementTouching` below).
+   *
+   *  R14 — MACHINE-CHECKABLE COVERAGE: a redundant-recompute invariant tags itself
+   *  `kind:'redundant-recompute'` and names the action type(s) it `covers`, so CI can
+   *  decide R12 coverage from the typed surface rather than trusting the free-text name. */
+  invariants: Array<
+    | { name: string; check(state: S, event: GameEvent): true | string }
+    | { name: string; kind: 'redundant-recompute'; covers: Array<keyof A>;
+        check(state: S, event: GameEvent): true | string }
+  >;
 
   /** R12: action types whose reducers move stakes/score with external consequence. CI
-   *  enforces that each is covered by a redundant-recompute invariant. */
+   *  enforces (R14) that each appears in some invariant's `covers`. */
   settlementTouching?: Array<keyof A>;
 
   /** R7: intent types admissible WITHOUT a grant (join-table, wallet callbacks,
@@ -221,6 +241,10 @@ export type ActionTypeMap = Record<string, CanonicalJson>;
 
 The **hanchan-carryover** and **cash-rebuy** gates re-ran against v0.1 (`docs/phase0/reruns/`,
 verdict `docs/phase0/1-RERUN-VERDICT.md`): 5/6 and 6/7 kill-shots survived; the two failures
-(undefined "grant order"; undefined SeatRef occupancy semantics) are closed by R8 and R9 above,
-now folded into this v0.2. A **confirmation gate pass** against v0.2 must return clean (6/6 and
-7/7) before the C7/C8 freeze. Until then this contract is DRAFT and may still move.
+(undefined "grant order"; undefined SeatRef occupancy semantics) were closed by R8/R9. The
+**confirmation pass** against v0.2 verified both kill-shots (K2 multi-ron, K7 seat-reuse privacy)
+genuinely close with no contradiction, and surfaced two quality findings now folded as R13/R14
+(this v0.3). **All flow-semantics kill-shots are closed.** Remaining before a hard C7/C8 freeze:
+R13's occupancy lifecycle gets its real exercise at the Phase 2 cash-game slice, and the contract
+becomes executable TypeScript (compiled, type-checked) in Phase 3 — the freeze rides on running
+code, not prose. Until then this contract is DRAFT.

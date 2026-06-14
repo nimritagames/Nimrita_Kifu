@@ -70,7 +70,37 @@ Revision Set 2 (R8–R12)**, folded into `01-game-contract.md` and re-confirmed 
   re-eval cycles per mahjong hand. Acceptable at turn-based rates; a runtime concern for `05-runtime.md`,
   not a contract gap.
 
+## Confirmation pass (against v0.2) — RESULT
+
+Both previously-failing kill-shots **genuinely close** within the contract as written, verified by an
+independent adversarial pass:
+
+- **K2 (multi-ron under R8):** closes, no new gap. Emission-order and identity-sort confirmed
+  orthogonal (a grant's identity is invariant under its array position; its admission position is
+  invariant under its internal action-type sort) — no single value serves both roles. Atamahane
+  (`admitLimit:1`) and double-ron pot/honba allocation are now determinate.
+- **K7 (seat-reuse privacy under R9):** closes. `projectEvent(old DEAL, viewer=fresh ref)` redacts
+  because `freshRef !== retiredRef`; holds on stateless per-seat replay; human-identity stays external
+  (C10). Privacy genuinely guaranteed by the contract text.
+
+**Two quality findings surfaced (neither reopens a kill-shot) → Contract Revision Set 3, folded into v0.3:**
+
+- **R13 — occupancy lifecycle is signalled.** R9's "key state on SeatRef" created a *game-authoring*
+  footgun: a SeatRef carried across a vacate/rejoin boundary dangles. Privacy-safe (a dangling owner
+  ref redacts for everyone — strictly *more* private), but a silent game-logic hazard. Fix: every
+  occupancy end is an event the game reduces (game LEAVE, or framework `seat.vacate`); every start is
+  `seat.join`/JOIN with a fresh ref. Games purge/remap at the boundary; a non-purged ref is detectably
+  dangling. Real exercise: Phase 2 cash-game slice.
+- **R14 — machine-checkable settlement coverage.** R12's CI obligation ("each settlement-touching
+  reducer has a redundant-recompute invariant") was not decidable from the typed surface. Fix:
+  redundant-recompute invariants tag `kind:'redundant-recompute'` and name what they `cover`, so CI
+  checks coverage from types, not free-text names.
+
 ## Freeze status
 
-The C7/C8 API freeze unblocks once R8–R12 are folded **and** a confirmation gate pass returns clean
-(both gates 6/6 and 7/7 within the revised contract). That confirmation run is the immediate next step.
+**All flow-semantics kill-shots are closed; the grant model (C7) is validated against poker, sealed-bid,
+draft, hanchan, cash-game, and byo-yomi.** The C7/C8 contract is settled in prose at v0.3. The remaining
+gates before a *hard* freeze are intentionally deferred to running code: R13 gets exercised by the Phase 2
+cash-game slice, and the whole contract becomes compiled, type-checked TypeScript with the gate designs as
+executable fixtures in Phase 3. The freeze rides on green tests, not on a document — per the production
+standard ("evidence over belief").
